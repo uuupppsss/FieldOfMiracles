@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:FieldOfMiracles"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
-    </Grid>
+    <StackPanel>
+        <TextBlock Margin="10"/>
+        <TextBox/>
+        <Button Content="угадать"/>
+    </StackPanel>
 </Window>
