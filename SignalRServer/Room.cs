@@ -21,5 +21,12 @@ namespace SignalRServer
         {
 
         }
+
+        public void GetNextPlayer()
+        {
+
+        }
+
+
     }
 }
