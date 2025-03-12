@@ -8,6 +8,7 @@ namespace SignalRServer
         public List<Player> PlayersList = new();
         public List<Question> Questions { get; set; }
         private static Question CurrentQuestion { get; set; }
+        public string GuessedWord  { get; set; }
         public GameHub()
         {
             Questions = new List<Question>()
@@ -20,6 +21,7 @@ namespace SignalRServer
             };
             random = new Random();
             CurrentQuestion = Questions[random.Next(Questions.Count - 1)];
+            GuessedWord = "";
         }
 
         public override Task OnConnectedAsync()
@@ -32,6 +34,7 @@ namespace SignalRServer
         {
             var player = new Player() { ConnectionId=Context.ConnectionId, Name=nick};
             PlayersList.Add(player);
+            
             await Clients.All.SendAsync("UpdatePlayers", PlayersList);
         }
 
@@ -49,16 +52,18 @@ namespace SignalRServer
             }
         }
 
-        public async Task SendGuess(string gues, int player_id)
+        public async Task SendGuess(string gues, string player_ConnectionId)
         {
+
+
             var isCorrect=CheckCorrectAnswer(gues);
             if (isCorrect)
             {
                 await Clients.All.SendAsync("AnswerGuessed", gues);
             }
-            if (CheckIfWinner(player_id))
+            if (CheckIfWinner(player_ConnectionId))
             {
-                await Clients.All.SendAsync("GameOver", $"Игрок {PlayersList.FirstOrDefault(p=>p.Id==player_id).Name} победил");
+                await Clients.All.SendAsync("GameOver", $"Игрок {PlayersList.FirstOrDefault(p=>p.ConnectionId == player_ConnectionId).Name} победил");
             }
             else
             {
@@ -68,12 +73,30 @@ namespace SignalRServer
 
         private bool CheckCorrectAnswer(string guess)
         {
-            return true;
+            if (guess.Length > 1)
+            {
+                if (CurrentQuestion.Answer == guess)
+                {
+                    
+                    return true;
+                }
+                else return false;
+            }
+            else
+            {
+                if (CurrentQuestion.Answer.Contains(guess))
+                {
+                    GuessedWord = guess;
+                    return true;
+                }
+                else return false;
+            }
         }
 
-        private bool CheckIfWinner(int player_id)
+        private bool CheckIfWinner(string player_ConnectionId)
         {
-            return true;
+            if (!GuessedWord.Contains("_")) return true;
+            else return false;
         }
     }
 }
